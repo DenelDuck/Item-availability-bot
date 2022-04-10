@@ -24,7 +24,7 @@ class bcolors:
 
 def main():
     print(f"{bcolors.HEADER}=========================================================={bcolors.ENDC}")
-    links = getURLs(DEFAULT_FILE)
+    links = getLinks(DEFAULT_FILE)
     if links == None:
         return
     checkLinks(links)
@@ -32,9 +32,9 @@ def main():
     
 # TODO:
 # Add periodically check
-# Join all available links in 1 email instead of one email per link
+# Join all links that are in stock in one email, instead of one email per link
 
-def getURLs(filename):
+def getLinks(filename):
     # open file
     try:
         with open(filename, "r") as file:
@@ -75,6 +75,7 @@ def checkLinks(links):
                 break
         if not oos:
             print(f"{bcolors.OKGREEN}{shortlink}... {bcolors.OKBLUE}{bcolors.BOLD}is in stock{bcolors.ENDC}")
+            # send email if not already sent by checking if it's present in ignore list
             try:
                 if link not in open(IGNOREFILE, "r").read():
                     ignore(link)
@@ -87,8 +88,9 @@ def checkLinks(links):
 
         
         
-
+# get html from link
 def getDataFromWeb(link):
+    # use headers to avoid 403 error
     hdr = {'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
     , 'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36'}
     try:
@@ -129,6 +131,7 @@ def sendEmail(link):
         print(f"{bcolors.ENDC}e")
 
 
+# append link to file, creates file if doesn't exist
 def ignore(link):
     with open(IGNOREFILE, "a+") as file:
         file.write(link + "\n")
