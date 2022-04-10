@@ -1,8 +1,14 @@
+import email
+from re import S
 import requests
 import json
+import smtplib
+from email.message import EmailMessage
 
 DEFAULT_FILE = "links.txt"
-KEYWORDS = "static/keywords.json"
+KEYWORDSFILE = "static/keywords.json"
+EMAILFILE = "email.txt"
+IGNOREFILE = "ignore.txt"
 
 # Color class for printing in terminal
 class bcolors:
@@ -25,9 +31,8 @@ def main():
     print(f"{bcolors.HEADER}=========================================================={bcolors.ENDC}")
     
 # TODO:
-# Add keywords to check for on link
 # Add periodically check
-# Email when available
+# Join all available links in 1 email instead of one email per link
 
 def getURLs(filename):
     # open file
@@ -45,10 +50,10 @@ def getURLs(filename):
 def checkLinks(links):
     # Get keywords
     try:
-        with open(KEYWORDS, "r") as file:
+        with open(KEYWORDSFILE, "r") as file:
             oosList = json.load(file)
     except FileNotFoundError:
-        print(f"{bcolors.FAIL}{bcolors.BOLD}File with filename {KEYWORDS} not found")
+        print(f"{bcolors.FAIL}{bcolors.BOLD}File with filename {KEYWORDSFILE} not found")
         return None
     # check every link in list
     for link in links:
@@ -70,20 +75,63 @@ def checkLinks(links):
                 break
         if not oos:
             print(f"{bcolors.OKGREEN}{shortlink}... {bcolors.OKBLUE}{bcolors.BOLD}is in stock{bcolors.ENDC}")
+            try:
+                if link not in open(IGNOREFILE, "r").read():
+                    ignore(link)
+                    sendEmail(link)
+            except:
+                print(f"{bcolors.WARNING}{bcolors.BOLD}Could not open {IGNOREFILE}, creating file{bcolors.ENDC}")
+                ignore(link)
+                sendEmail(link)
+
+
         
         
 
-def getDataFromWeb(url):
+def getDataFromWeb(link):
     hdr = {'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
     , 'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36'}
     try:
-        with requests.get(url, headers=hdr) as r:
+        with requests.get(link, headers=hdr) as r:
             if r.status_code == 200:
                 return r.text
             return None
     except:
-        print(f"{bcolors.WARNING}{bcolors.BOLD}Could not open {url}{bcolors.ENDC}")
+        print(f"{bcolors.WARNING}{bcolors.BOLD}Could not open {link}{bcolors.ENDC}")
         return None
     
+
+def sendEmail(link):
+    # create email message
+    msg = EmailMessage()
+    msg['Subject'] = "Link is in stock!"
+    # get email addresses and password from file for privacy reasons
+    with open(EMAILFILE, 'r') as file:
+        receiver = file.readline()
+        sender = file.readline()
+        password = file.readline()
+        print(f"{bcolors.OKGREEN}Sending email to {bcolors.BOLD}{receiver}{bcolors.OKGREEN} from {bcolors.BOLD}{sender}{bcolors.OKGREEN}")
+        msg['From'] = sender
+        msg['To'] = receiver
+    msg.set_content(f"{link}\nis in stock!")
+
+    # send message via gmail server
+    try:
+        s = smtplib.SMTP('smtp.gmail.com', 587)
+        s.ehlo()
+        s.starttls()
+        s.login(sender, password)
+        s.sendmail(sender, receiver, msg.as_string())
+        print(f"{bcolors.OKGREEN}Email sent to {bcolors.BOLD}{receiver}{bcolors.OKGREEN}")
+        s.quit()
+    except smtplib.SMTPException as e:
+        print(f"{bcolors.WARNING}{bcolors.BOLD}Could not send email{bcolors.ENDC}")
+        print(f"{bcolors.ENDC}e")
+
+
+def ignore(link):
+    with open(IGNOREFILE, "a+") as file:
+        file.write(link + "\n")
+
 
 main()
