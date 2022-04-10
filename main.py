@@ -1,7 +1,10 @@
 import requests
+import json
 
 DEFAULT_FILE = "links.txt"
+KEYWORDS = "static/keywords.json"
 
+# Color class for printing in terminal
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -40,7 +43,14 @@ def getURLs(filename):
 
 
 def checkLinks(links):
-    oosList= {"out of stock", "out-of-stock", "uitverkocht", "not available", "niet leverbaar"}
+    # Get keywords
+    try:
+        with open(KEYWORDS, "r") as file:
+            oosList = json.load(file)
+    except FileNotFoundError:
+        print(f"{bcolors.FAIL}{bcolors.BOLD}File with filename {KEYWORDS} not found")
+        return None
+    # check every link in list
     for link in links:
         if link == "":
             continue
