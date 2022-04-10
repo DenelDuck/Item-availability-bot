@@ -4,13 +4,17 @@ DEFAULT_FILE = "links.txt"
 
 # create function
 def main():
+    print("\033[0;32;40m==========================================================\033[0;32;40m")
     links = getURLs(DEFAULT_FILE)
     if links == None:
         return
-    
     checkLinks(links)
+    print("\033[0;32;40m==========================================================\033[0;32;40m")
     
-
+# TODO:
+# Add keywords to check for on link
+# Add periodically check
+# Email when available
 
 def getURLs(filename):
     # open file
@@ -30,19 +34,21 @@ def checkLinks(links):
     for link in links:
         if link == "":
             continue
-        print("Checking %s..." % link[:100])
+        print("\033[0;32;40mChecking \033[1;32;40m%s\033[0;32;40m..." % link[:100])
+        # get html from link
         data = getDataFromWeb(link)
         if data == None:
-            print("Did not receive content from %s..." % link[:100])
+            print("\033[1;37;41mDid not receive content from %s...\033[0;32;40m" % link[:100])
             continue
+        # check for keywords in html
         oos = False
         for word in oosList:
             if word in data.lower():
-                print("%s... is out of stock" % link[:100])
+                print("%s... \033[1;37;41mis out of stock\033[0;32;40m" % link[:100])
                 oos = True
                 break
         if not oos:
-            print("%s... is in stock" % link[:100])
+            print("%s... \033[1;37;42mis in stock\033[0;32;40m" % link[:100])
         
         
 
@@ -56,6 +62,7 @@ def getDataFromWeb(url):
             return None
     except:
         print("Could not open %s" % url[:100])
+        return None
     
 
 main()
