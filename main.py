@@ -2,14 +2,24 @@ import requests
 
 DEFAULT_FILE = "links.txt"
 
-# create function
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 def main():
-    print("\033[0;32;40m==========================================================\033[0;32;40m")
+    print(f"{bcolors.HEADER}=========================================================={bcolors.ENDC}")
     links = getURLs(DEFAULT_FILE)
     if links == None:
         return
     checkLinks(links)
-    print("\033[0;32;40m==========================================================\033[0;32;40m")
+    print(f"{bcolors.HEADER}=========================================================={bcolors.ENDC}")
     
 # TODO:
 # Add keywords to check for on link
@@ -25,7 +35,7 @@ def getURLs(filename):
             return lines
     # catch error if file does not exist
     except FileNotFoundError:
-        print("File with filename %s not found" % filename)
+        print(f"{bcolors.FAIL}{bcolors.BOLD}File with filename {filename} not found")
         return None
 
 
@@ -34,21 +44,22 @@ def checkLinks(links):
     for link in links:
         if link == "":
             continue
-        print("\033[0;32;40mChecking \033[1;32;40m%s\033[0;32;40m..." % link[:100])
+        shortlink = link[:80]
+        print(f"{bcolors.OKGREEN}Checking {bcolors.BOLD}{shortlink}{bcolors.OKGREEN}...{bcolors.ENDC}")
         # get html from link
         data = getDataFromWeb(link)
         if data == None:
-            print("\033[1;37;41mDid not receive content from %s...\033[0;32;40m" % link[:100])
+            print(f"{bcolors.FAIL}Did not receive content from {bcolors.BOLD}{shortlink}{bcolors.FAIL}...{bcolors.ENDC}")
             continue
         # check for keywords in html
         oos = False
         for word in oosList:
             if word in data.lower():
-                print("%s... \033[1;37;41mis out of stock\033[0;32;40m" % link[:100])
+                print(f"{bcolors.OKGREEN}{shortlink}... {bcolors.FAIL}{bcolors.BOLD}is out of stock{bcolors.ENDC}")
                 oos = True
                 break
         if not oos:
-            print("%s... \033[1;37;42mis in stock\033[0;32;40m" % link[:100])
+            print(f"{bcolors.OKGREEN}{shortlink}... {bcolors.OKBLUE}{bcolors.BOLD}is in stock{bcolors.ENDC}")
         
         
 
@@ -61,7 +72,7 @@ def getDataFromWeb(url):
                 return r.text
             return None
     except:
-        print("Could not open %s" % url[:100])
+        print(f"{bcolors.WARNING}{bcolors.BOLD}Could not open {url}{bcolors.ENDC}")
         return None
     
 
