@@ -1,4 +1,3 @@
-import email
 from re import S
 import requests
 import json
@@ -29,10 +28,13 @@ def main():
         return
     checkLinks(links)
     print(f"{bcolors.HEADER}=========================================================={bcolors.ENDC}")
-    
+
 # TODO:
 # Add periodically check
 # Join all links that are in stock in one email, instead of one email per link
+# Easily add links to file
+# Interface?
+# links stored in json array
 
 def getLinks(filename):
     # open file
@@ -85,9 +87,6 @@ def checkLinks(links):
                 ignore(link)
                 sendEmail(link)
 
-
-        
-        
 # get html from link
 def getDataFromWeb(link):
     # use headers to avoid 403 error
@@ -130,11 +129,10 @@ def sendEmail(link):
         print(f"{bcolors.WARNING}{bcolors.BOLD}Could not send email{bcolors.ENDC}")
         print(f"{bcolors.ENDC}e")
 
-
 # append link to file, creates file if doesn't exist
 def ignore(link):
     with open(IGNOREFILE, "a+") as file:
         file.write(link + "\n")
 
-
-main()
+if __name__ == "__main__":
+    main()
