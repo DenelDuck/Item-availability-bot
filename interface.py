@@ -14,7 +14,7 @@ with open(main.DEFAULT_FILE, "r") as file:
     lines = data.split("\n")
 layout = [  
             [sg.Text('Links to check:', size=(15, 1)), sg.InputText(key='-INPUT-', size=(80, 1), do_not_clear=False)],
-            [sg.Listbox(values=lines, size=(100, 10), key='-OUTPUT-', right_click_menu=['&Right', ['Open Link', 'Copy Link']])],
+            [sg.Listbox(values=lines, size=(100, 10), key='-OUTPUT-', no_scrollbar=True, right_click_menu=['&Right', ['Open Link', 'Copy Link']])],
             [sg.Button('Add'), sg.Button('Remove'), sg.Button('Check'), sg.Button('Exit')],
             [sg.Listbox(values='', size=(100, 10), visible=False, key="-CMDOUT-")]
         ]

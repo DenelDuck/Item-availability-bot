@@ -32,8 +32,6 @@ def main():
 # TODO:
 # Add periodically check
 # Join all links that are in stock in one email, instead of one email per link
-# Easily add links to file
-# Interface?
 # links stored in json array
 
 def getLinks(filename):
